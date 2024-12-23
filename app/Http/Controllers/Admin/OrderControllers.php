@@ -56,6 +56,12 @@ class OrderControllers extends Controller
         if ($this->request->input('name')) {
             $order = $order->where('name', 'like', "%" . $this->request->input('name') . "%");
         }
+        if ($this->request->input('major_name')) {
+            $order = $order->where('major_name', 'like', "%" . $this->request->input('major_name') . "%");
+        }
+        if ($this->request->input('manuscript_plan')) {
+            $order = $order->where('manuscript_plan', '=', $this->request->input('manuscript_plan'));
+        }
         if ($this->request->input('staff_name')) {
             $order = $order->where('staff_name', 'like', "%" . $this->request->input('staff_name') . "%");
         }
@@ -131,10 +137,10 @@ class OrderControllers extends Controller
             $data['classify_local_id'] = null;
             $data['classify_id'] = null;
         }
-        if (isset($data['amount']) && isset($data['received_amount'])) {
-            if ($data['amount'] == $data['received_amount'])
-                $data['finance_check'] = 1;
-        }
+//        if (isset($data['amount']) && isset($data['received_amount'])) {
+//            if ($data['amount'] == $data['received_amount'])
+//                $data['finance_check'] = 1;
+//        }
         return Order::create($data);
     }
 
@@ -277,6 +283,41 @@ class OrderControllers extends Controller
         return $name . ",将订单状态" . $data[$historyStarus] . "修改为" . $data[$status];
     }
 
+    public function planReplace($name, $historyStarus, $status)
+    {
+        $data = [
+            '1' => '定制题目',
+            '2' => '提纲写作',
+            '3' => '开题写作',
+            '4' => '综述写作',
+            '5' => "文章写作",
+            '6' => "文章修改",
+            '7' => "其他制作",
+        ];
+        return ",并将稿件进度" . $data[$historyStarus] . "修改为" . $data[$status];
+    }
+
+    /**
+     * FunctionName：check
+     * Description：财务审核
+     * Author：cherish
+     * @return mixed
+     */
+    public function check()
+    {
+        $this->request->validate([
+            'id' => ['required', 'exists:' . (new Order())->getTable() . ',id'],
+            'type' => ['required'],
+            "status" => ['required'],
+        ]);
+        $data = $this->request->input();
+        if ($data["type"] == 1) {
+            return Order::where('id', $data['id'])->update(["finance_check" => $data['status']]);
+        } else {
+            return Order::where('id', $data['id'])->update(["trail_check" => $data['status']]);
+        }
+    }
+
     /**
      * FunctionName：manuscript
      * Description：上传稿件
@@ -289,11 +330,13 @@ class OrderControllers extends Controller
             'id' => ['required', 'exists:' . (new Order())->getTable() . ',id'],
             'manuscript' => ['required'],
             "alter_word" => ['required'],
+            "manuscript_plan" => ['required'],
             "classify_id" => ['required']
         ]);
         $order = Order::find($this->request->input('id'));
         $alter_word = $this->request->input('alter_word') ?? $order['alter_word'];
-        $orderLogs['remark'] = $this->statusReplace(\Auth::user()->name, $order['status'], 5);
+        $remark = $this->planReplace(\Auth::user()->name, $order['manuscript_plan'], $this->request['manuscript_plan']);
+        $orderLogs['remark'] = $this->statusReplace(\Auth::user()->name, $order['status'], 5) . $remark;
         $orderLogs['url'] = $this->request->input('manuscript');
         $orderLogs['order_id'] = $this->request->input('id');
         $data = $this->request->input();
@@ -306,7 +349,7 @@ class OrderControllers extends Controller
         }
         return DB::transaction(function () use ($orderLogs, $alter_word, $classify_id, $classify_local_id) {
             OrderLogs::create($orderLogs);
-            return Order::where('id', $this->request->input('id'))->Update(['manuscript' => $this->request->input('manuscript'), "status" => 5, "proposal" => 5, 'alter_word' => $alter_word, 'classify_id' => $classify_id, 'classify_local_id' => $classify_local_id, 'edit_submit_time' => date("Y-m-d H:i:s")]);
+            return Order::where('id', $this->request->input('id'))->Update(['manuscript' => $this->request->input('manuscript'), "manuscript_plan" => $this->request->input('manuscript_plan'), "edit_remark" => $this->request->input('edit_remark') ?? "", "status" => 5, "proposal" => 5, 'alter_word' => $alter_word, 'classify_id' => $classify_id, 'classify_local_id' => $classify_local_id, 'edit_submit_time' => date("Y-m-d H:i:s")]);
         });
     }
 
@@ -382,6 +425,7 @@ class OrderControllers extends Controller
             'attachment' => $data['attachment'] ?? '',
             'othen_amount' => $data['othen_amount'] ?? 0,
             'receipt_account_new' => $data['receipt_account_new'] ?? '',
+            'trail_account' => $data['trail_account'] ?? '',
         ];
         return $initData;
     }
@@ -425,6 +469,12 @@ class OrderControllers extends Controller
         }
         if ($this->request->input('status')) {
             $order = $order->where('status', '=', $this->request->input('status'));
+        }
+        if ($this->request->input('major_name')) {
+            $order = $order->where('major_name', 'like', "%" . $this->request->input('major_name') . "%");
+        }
+        if ($this->request->input('manuscript_plan')) {
+            $order = $order->where('manuscript_plan', '=', $this->request->input('manuscript_plan'));
         }
         if ($this->request->input('is_audit')) {
             $order = $order->where('is_audit', '=', $this->request->input('is_audit'));

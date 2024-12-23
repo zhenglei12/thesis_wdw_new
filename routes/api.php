@@ -63,12 +63,14 @@ Route::group(['namespace' => 'Admin', 'middleware' => ['cross', 'auth:sanctum', 
     Route::post("order/statistics", "OrderControllers@statistics")->name('order-statistics');
     Route::post("order/status", "OrderControllers@status")->name('order-status');
     Route::post("order/logs", "OrderControllers@logs")->name('order-logs');
+
+    Route::post("order/check", "OrderControllers@check")->name('order-check');
     Route::post("order/edit_name", "OrderControllers@editName")->name('order-edit.name');
     Route::post("order/manuscript", "OrderControllers@manuscript")->name('order-manuscript');
 
 //    Route::post("order/hard_grade", "OrderControllers@grade")->name('order-hard.grade');
 
-//    Route::post("order/after", "OrderControllers@after")->name('order-after');
+    Route::post("order/after", "OrderControllers@after")->name('order-after');
 
     Route::post("classify/list", "ClassifyControllers@list")->name('classify-list');
     Route::post("classify/delete", "ClassifyControllers@delete")->name('classify-delete');

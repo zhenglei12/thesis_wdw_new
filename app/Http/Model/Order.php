@@ -41,7 +41,11 @@ class Order extends Model
         'attachment',
         'proposal',
         'othen_amount',
-        "receipt_account_new"
+        "receipt_account_new",
+        "trail_account",
+        "trail_check",
+        "manuscript_plan",
+        "edit_remark"
     ];
 
     protected $casts = [
