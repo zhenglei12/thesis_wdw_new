@@ -317,13 +317,13 @@ class OrderControllers extends Controller
         $this->request->validate([
             'id' => ['required', 'exists:' . (new Order())->getTable() . ',id'],
             'type' => ['required'],
-            "status" => ['required'],
+//            "status" => ['required'],
         ]);
         $data = $this->request->input();
         if ($data["type"] == 1) {
-            return Order::where('id', $data['id'])->update(["finance_check" => $data['status']]);
+            return Order::where('id', $data['id'])->update(["finance_check" => 1]);
         } else {
-            return Order::where('id', $data['id'])->update(["trail_check" => $data['status']]);
+            return Order::where('id', $data['id'])->update(["trail_check" =>1]);
         }
     }
 
