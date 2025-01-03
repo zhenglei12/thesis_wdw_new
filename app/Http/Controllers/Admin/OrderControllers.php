@@ -62,6 +62,15 @@ class OrderControllers extends Controller
         if ($this->request->input('manuscript_plan')) {
             $order = $order->where('manuscript_plan', '=', $this->request->input('manuscript_plan'));
         }
+
+        if ($this->request->input('type')) {
+            if($this->request->input('type') == 1){
+                $order = $order->where('finance_check', '=', 1);
+            }else{
+                $order = $order->where('trail_check', '=', 1);
+            }
+
+        }
         if ($this->request->input('staff_name')) {
             $order = $order->where('staff_name', 'like', "%" . $this->request->input('staff_name') . "%");
         }
@@ -475,6 +484,14 @@ class OrderControllers extends Controller
         }
         if ($this->request->input('manuscript_plan')) {
             $order = $order->where('manuscript_plan', '=', $this->request->input('manuscript_plan'));
+        }
+        if ($this->request->input('type')) {
+            if($this->request->input('type') == 1){
+                $order = $order->where('finance_check', '=', 1);
+            }else{
+                $order = $order->where('trail_check', '=', 1);
+            }
+
         }
         if ($this->request->input('is_audit')) {
             $order = $order->where('is_audit', '=', $this->request->input('is_audit'));
