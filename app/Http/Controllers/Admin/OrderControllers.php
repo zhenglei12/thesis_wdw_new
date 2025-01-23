@@ -64,9 +64,9 @@ class OrderControllers extends Controller
         }
 
         if ($this->request->input('type')) {
-            if($this->request->input('type') == 1){
+            if ($this->request->input('type') == 1) {
                 $order = $order->where('finance_check', '=', 1);
-            }else{
+            } else {
                 $order = $order->where('trail_check', '=', 1);
             }
 
@@ -259,7 +259,7 @@ class OrderControllers extends Controller
         $orderLogs = [];
         $orderLogs['order_id'] = $this->request->input('id');
         $orderLogs['remark'] = $this->statusReplace(\Auth::user()->name, $order['status'], $this->request['status']);
-        if ($this->request->input('manuscript')) {
+        if ($this->request->input('manuscript') && $this->request->input('status') == 2) {
             $data['manuscript'] = $this->request->input('manuscript');
             $orderLogs['url'] = $this->request->input('manuscript');
         }
@@ -323,7 +323,7 @@ class OrderControllers extends Controller
         if ($data["type"] == 1) {
             return Order::where('id', $data['id'])->update(["finance_check" => 1]);
         } else {
-            return Order::where('id', $data['id'])->update(["trail_check" =>1]);
+            return Order::where('id', $data['id'])->update(["trail_check" => 1]);
         }
     }
 
@@ -486,9 +486,9 @@ class OrderControllers extends Controller
             $order = $order->where('manuscript_plan', '=', $this->request->input('manuscript_plan'));
         }
         if ($this->request->input('type')) {
-            if($this->request->input('type') == 1){
+            if ($this->request->input('type') == 1) {
                 $order = $order->where('finance_check', '=', 1);
-            }else{
+            } else {
                 $order = $order->where('trail_check', '=', 1);
             }
 
