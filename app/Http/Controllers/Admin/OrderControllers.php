@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Constants\CodeMessageConstants;
 use App\Http\Controllers\Controller;
 use App\Http\Model\Classify;
+use App\Http\Model\Department;
 use App\Http\Model\Order;
 use App\Http\Model\OrderLogs;
 use App\Http\Model\User;
