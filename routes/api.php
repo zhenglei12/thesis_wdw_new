@@ -33,6 +33,8 @@ Route::group(['namespace' => 'Admin', 'middleware' => ['auth:sanctum', 'cross']]
     Route::post("pub/role/user_list", "RoleControllers@userList");
     Route::post('qiniu/auth', 'UploadController@qiniuAuth'); //获取图片上传token
     Route::post("public/classify/list", "ClassifyControllers@getThreeCalssifyAll");
+
+    Route::post("public/department/list", "DepartmentController@getThreeCalssifyAll");
 });
 
 Route::group(['namespace' => 'Admin', 'middleware' => ['cross', 'auth:sanctum', 'ly.permission']], function () {
@@ -90,5 +92,10 @@ Route::group(['namespace' => 'Admin', 'middleware' => ['cross', 'auth:sanctum', 
     Route::post("manuscript_bank/delete", "ManuscriptBankControllers@delete")->name('manuscript_bank-delete');
     Route::post("manuscript_bank/update", "ManuscriptBankControllers@update")->name('manuscript_bank-update');
     Route::post("manuscript_bank/add", "ManuscriptBankControllers@create")->name('manuscript_bank-create');
+
+    Route::post("department/list", "DepartmentController@list")->name('department-list');
+    Route::post("department/delete", "DepartmentController@delete")->name('department-delete');
+    Route::post("department/update", "DepartmentController@update")->name('department-update');
+    Route::post("department/add", "DepartmentController@create")->name('department-create');
 });
 

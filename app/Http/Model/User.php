@@ -18,7 +18,7 @@ class User extends Authenticatable
     protected $table = "users";
 
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'department_id'
     ];
 
     /**
@@ -34,6 +34,11 @@ class User extends Authenticatable
         'updated_at' => 'datetime:Y-m-d H:i:s',
         'created_at' => 'datetime:Y-m-d H:i:s',
     ];
+
+    public function department()
+    {
+        return $this->hasOne(Department::class, 'id', 'department_id');
+    }
 
     protected function serializeDate(\DateTimeInterface $date)
     {

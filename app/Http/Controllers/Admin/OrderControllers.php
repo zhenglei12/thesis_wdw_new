@@ -27,6 +27,89 @@ class OrderControllers extends Controller
         $this->services = $services;
     }
 
+
+    /**
+     * FunctionName：getInitSelect
+     * Description：根据角色和部门获取权限
+     * User: cherish
+     * @param $order
+     * @return mixed|void
+     */
+    public function getInitSelect($order)
+    {
+        $user = \Auth::user();
+        $department_id = $user->department_id;
+        //查询当前部门信息
+        $department = Department::where('id', $department_id)->first();
+        //查询用户当前角色
+        $role = $user->roles->pluck('alias')->toArray();
+        if (in_array('admin', $role)) {
+            return $order;
+        } elseif (in_array('after_admin', $role)) {
+            $order = $order->whereNotNull('after_name');
+            if ($department) {
+                if ($department['level'] == 3) {
+                    $userName = User::where('department_id', $department['id'])->pluck('name');
+                    $parentDepartment = Department::where("id", $department['parent_id'])->first();
+                    if ($userName->count()) {
+                        if ($parentDepartment['alias'] == "staff")
+                            $order = $order->whereIn('staff_name', $userName->toArray());
+                        if ($parentDepartment['alias'] == "edit")
+                            $order = $order->whereIn('edit_name', $userName->toArray());
+                        if ($parentDepartment['alias'] == "after")
+                            $order = $order->whereIn('after_name', $userName->toArray());
+                    } else {
+                        $order = $order->whereNull('staff_name');
+                    }
+                }
+            }
+        } elseif (in_array('staff_admin', $role)) {
+            $order = $order->whereNotNull('staff_name');
+            if ($department) {
+                if ($department['level'] == 3) {
+                    $userName = User::where('department_id', $department['id'])->pluck('name');
+                    $parentDepartment = Department::where("id", $department['parent_id'])->first();
+                    if ($userName->count()) {
+                        if ($parentDepartment['alias'] == "staff")
+                            $order = $order->whereIn('staff_name', $userName->toArray());
+                        if ($parentDepartment['alias'] == "edit")
+                            $order = $order->whereIn('edit_name', $userName->toArray());
+                        if ($parentDepartment['alias'] == "after")
+                            $order = $order->whereIn('after_name', $userName->toArray());
+                    } else {
+                        $order = $order->whereNull('staff_name');
+                    }
+                }
+            }
+        } elseif (in_array('edit_admin', $role)) {
+            // $order = $order->whereNotNull('edit_name');
+            if ($department) {
+                if ($department['level'] == 3) {
+                    $userName = User::where('department_id', $department['id'])->pluck('name');
+                    $parentDepartment = Department::where("id", $department['parent_id'])->first();
+                    if ($userName->count()) {
+                        if ($parentDepartment['alias'] == "staff")
+                            $order = $order->whereIn('staff_name', $userName->toArray());
+                        if ($parentDepartment['alias'] == "edit")
+                            $order = $order->whereIn('edit_name', $userName->toArray());
+                        if ($parentDepartment['alias'] == "after")
+                            $order = $order->whereIn('after_name', $userName->toArray());
+                    } else {
+                        $order = $order->whereNull('staff_name');
+                    }
+                }
+            }
+        } elseif (!in_array('after_admin', $role) && in_array('after', $role)) {
+            $order = $order->where('after_name', $user->name);
+        } elseif (!in_array('edit_admin', $role) && in_array('edit', $role)) {
+            $order = $order->where('edit_name', $user->name);
+        } elseif (!in_array('staff_admin', $role) && in_array('staff', $role)) {
+            $order = $order->where('staff_name', $user->name);
+        }
+        return $order;
+    }
+
+
     /**
      * FunctionName：list
      * Description：列表
@@ -38,6 +121,7 @@ class OrderControllers extends Controller
         $page = $this->request->input('page') ?? 1;
         $pageSize = $this->request->input('pageSize') ?? 10;
         $order = new Order();
+        $order = $this->getInitSelect($order);
         if ($this->request->input('subject')) {
             $order = $order->where('subject', 'like', "%" . $this->request->input('subject') . "%");
         }
@@ -443,6 +527,7 @@ class OrderControllers extends Controller
     public function export()
     {
         $order = new Order();
+        $order = $this->getInitSelect($order);
         if ($this->request->input('subject')) {
             $order = $order->where('subject', 'like', "%" . $this->request->input('subject') . "%");
         }
