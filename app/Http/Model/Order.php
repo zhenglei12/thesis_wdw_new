@@ -45,7 +45,8 @@ class Order extends Model
         "trail_account",
         "trail_check",
         "manuscript_plan",
-        "edit_remark"
+        "edit_remark",
+        "manuscript_content"
     ];
 
     protected $casts = [

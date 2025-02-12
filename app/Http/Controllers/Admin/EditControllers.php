@@ -7,7 +7,9 @@ use App\Http\Model\Order;
 use App\Http\Model\Role;
 use App\Http\Model\User;
 use Illuminate\Http\Request;
+use App\Http\Services\ExportsStaffService;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EditControllers
 {
@@ -154,6 +156,88 @@ class EditControllers
             DB::raw("	sum(case when status = 5 then 1 else 0 end) as all_finish") //订单完成(总已经完成数量)
         )->groupBy('edit_name')->paginate($pageSize, ['*'], "page", $page);
         return $data;
+    }
+
+
+    /**
+     * FunctionName：dayList
+     * Description：单日统计导出
+     * Author：cherish
+     * @return mixed
+     */
+    public function dayListExport()
+    {
+//        $page = $this->request->input('page') ?? 1;
+//        $pageSize = $this->request->input('pageSize') ?? 10;
+//        $order = new Order();
+//        $allOrder = new Order();
+//        if ($this->request->input('name')) {
+//            $order = $order->where('edit_name', 'like', "%" . $this->request->input('name') . "%");
+//        }
+//        if ($this->request->input('created_at')) {
+//            $date =$this->request->input('created_at');
+//        } else {
+//            $date = date("Y-m-d");
+//        }
+//        $role = Role::where('alias', "edit")->first();
+//        $userName = User::role($role['name'])->pluck('name');
+//        $order = $order->whereIn('edit_name', $userName);
+//
+//        return $order->select(
+//            "edit_name",
+//            DB::raw("count(case when edit_submit_time like '%$date%' then edit_submit_time else null end) as commit"), //提交数量
+//            DB::raw("sum(case when edit_submit_time like '%$date%' then word_number else 0 end) as commit_word_number"), //提交字数
+//            DB::raw("count(case when edit_submit_time like '%$date%' then edit_submit_time else null end) as alter_number"), //修改数量
+//            DB::raw("sum(case when edit_submit_time like '%$date%' then alter_word else 0 end) as alter_word_number"), //修改字数
+//            DB::raw("count(case when created_at like '%$date%' then created_at else null end ) as num"), //数量
+//            DB::raw("	sum(case when created_at like '%$date%' then amount else 0 end) as amount"),//金额
+//            DB::raw("sum(case when created_at like '%$date%' then word_number else 0 end) as word_number") //字数
+//        )->groupBy('edit_name')->paginate($pageSize, ['*'], "page", $page);
+        $page = $this->request->input('page') ?? 1;
+        $pageSize = $this->request->input('pageSize') ?? 15;
+        $order = new Order();
+        $all = new Order();
+        if ($this->request->input('name')) {
+            $order = $order->where('edit_name', 'like', "%" . $this->request->input('name') . "%");
+            $all = $all->where('edit_name', 'like', "%" . $this->request->input('name') . "%");
+        }
+        if ($this->request->input('end_time')) {
+            $order = $order->whereDate('created_at', '<=', $this->request->input('end_time'))->whereDate('created_at', '>=', $this->request->input('created_at'));
+            $all = $all->whereDate('created_at', '<=', $this->request->input('end_time'))->whereDate('created_at', '>=', $this->request->input('created_at'));
+        }
+        $user = \Auth::user();
+        if ($user->roles->pluck('alias')[0] == 'edit') {
+            $order = $order->where('edit_name', $user['name']);
+            $all = $all->where('edit_name', $user['name']);
+        } else {
+            $role = Role::where('alias', "edit")->first();
+            $userName = User::role($role['name'])->pluck('name');
+            $order = $order->whereIn('edit_name', $userName);
+            $all = $all->whereIn('edit_name', $userName);
+        }
+
+        $data['amount_count'] = $all->sum('amount');
+        $data['received_amount_count'] = $all->sum('received_amount');
+        $data['receipt_amount_count'] = number_format($all->sum('amount') - $all->sum('received_amount'), 2, '.', '');
+        $data['after_amount_count'] = $all->sum('othen_amount');
+        $data['alter_word_count'] = $all->sum('word_number');
+        $data['all_finish'] = $all->where('status', 3)->count();
+        $data['list'] = $order->select(
+            "edit_name",
+            DB::raw('sum(amount) as amount'),
+            DB::raw('sum(received_amount) as received_amount'),
+            DB::raw('sum(ifnull(amount,0)) - sum(ifnull(received_amount,0)) as receipt_time'),
+            DB::raw('sum(ifnull(othen_amount,0)) as after_banlace'),
+            DB::raw('sum(CASE WHEN status = 5 THEN word_number  ELSE 0 END) as word_number'),
+            //  DB::raw('sum(ifnull(word_number,0)) as word_number'),
+            DB::raw("	sum(case when status = 5 then 1 else 0 end) as all_finish") //订单完成(总已经完成数量)
+        )->groupBy('edit_name')->paginate($pageSize, ['*'], "page", $page);
+        if (count($data) < 1)
+            throw \ExceptionFactory::business(CodeMessageConstants::CHECK_ORDER_NULL);
+        if (count($data) > 2000)
+            throw \ExceptionFactory::business(CodeMessageConstants::CHECK_ORDER_NUM);
+        $filename = '销售统计列表.xls';
+        return Excel::download(new ExportsStaffService($data['list']), $filename);
     }
 
     public function orderList()

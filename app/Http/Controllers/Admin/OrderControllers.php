@@ -148,22 +148,22 @@ class OrderControllers extends Controller
             $order = $order->where('manuscript_plan', '=', $this->request->input('manuscript_plan'));
         }
 
-        if ($this->request->input('type')) {
-            if ($this->request->input('type') == 1) {
-                $order = $order->where('finance_check', '=', 1);
-            } else {
-                $order = $order->where('trail_check', '=', 1);
-            }
 
+        if ($this->request->input('finance_check')) {
+            $order = $order->where('finance_check', '=', $this->request->input('finance_check'));
         }
+        if ($this->request->input('trail_check')) {
+            $order = $order->where('trail_check', '=', $this->request->input('trail_check'));
+        }
+
         if ($this->request->input('staff_name')) {
             $order = $order->where('staff_name', 'like', "%" . $this->request->input('staff_name') . "%");
         }
         if ($this->request->input('edit_name')) {
             $order = $order->where('edit_name', 'like', "%" . $this->request->input('edit_name') . "%");
         }
-        if ($this->request->input('submission_end_time')) {
-            $order = $order->whereDate('submission_time', '<=', $this->request->input('submission_end_time'))->whereDate('submission_time', '>=', $this->request->input('submission_time'));
+        if ($this->request->input('submission_time')) {
+            $order = $order->where('submission_time', '<=', $this->request->input('submission_time'));
         }
         if ($this->request->input('status')) {
             $order = $order->where('status', '=', $this->request->input('status'));
@@ -425,7 +425,8 @@ class OrderControllers extends Controller
             'manuscript' => ['required'],
             "alter_word" => ['required'],
             "manuscript_plan" => ['required'],
-            "classify_id" => ['required']
+            // "classify_id" => ['required']
+            "manuscript_content" => ['required'],
         ]);
         $order = Order::find($this->request->input('id'));
         $alter_word = $this->request->input('alter_word') ?? $order['alter_word'];
@@ -434,16 +435,16 @@ class OrderControllers extends Controller
         $orderLogs['url'] = $this->request->input('manuscript');
         $orderLogs['order_id'] = $this->request->input('id');
         $data = $this->request->input();
-        if (isset($data['classify_id'])) {
-            $classify_local_id = (new ManuscriptBankControllers())->getClassifyId($this->request->input('classify_id'));
-            $classify_id = implode(",", $this->request->input('classify_id'));
-        } else {
-            $classify_local_id = null;
-            $classify_id = null;
-        }
-        return DB::transaction(function () use ($orderLogs, $alter_word, $classify_id, $classify_local_id) {
+//        if (isset($data['classify_id'])) {
+//            $classify_local_id = (new ManuscriptBankControllers())->getClassifyId($this->request->input('classify_id'));
+//            $classify_id = implode(",", $this->request->input('classify_id'));
+//        } else {
+//            $classify_local_id = null;
+//            $classify_id = null;
+//        }
+        return DB::transaction(function () use ($orderLogs, $alter_word) {
             OrderLogs::create($orderLogs);
-            return Order::where('id', $this->request->input('id'))->Update(['manuscript' => $this->request->input('manuscript'), "manuscript_plan" => $this->request->input('manuscript_plan'), "edit_remark" => $this->request->input('edit_remark') ?? "", "status" => 5, "proposal" => 5, 'alter_word' => $alter_word, 'classify_id' => $classify_id, 'classify_local_id' => $classify_local_id, 'edit_submit_time' => date("Y-m-d H:i:s")]);
+            return Order::where('id', $this->request->input('id'))->Update(['manuscript' => $this->request->input('manuscript'), "manuscript_plan" => $this->request->input('manuscript_plan'), "edit_remark" => $this->request->input('edit_remark') ?? "", "status" => 5, "proposal" => 5, 'alter_word' => $alter_word, 'manuscript_content' => $this->request->input('manuscript_content'), 'edit_submit_time' => date("Y-m-d H:i:s")]);
         });
     }
 
@@ -560,7 +561,7 @@ class OrderControllers extends Controller
             $order = $order->whereDate('created_at', '<=', $this->request->input('end_time'))->whereDate('created_at', '>=', $this->request->input('created_at'));
         }
         if ($this->request->input('submission_time')) {
-            $order = $order->where('submission_time', 'like', "%" . $this->request->input('submission_time') . "%");
+            $order = $order->where('submission_time', '<=', $this->request->input('submission_time'));
         }
         if ($this->request->input('status')) {
             $order = $order->where('status', '=', $this->request->input('status'));
@@ -571,13 +572,11 @@ class OrderControllers extends Controller
         if ($this->request->input('manuscript_plan')) {
             $order = $order->where('manuscript_plan', '=', $this->request->input('manuscript_plan'));
         }
-        if ($this->request->input('type')) {
-            if ($this->request->input('type') == 1) {
-                $order = $order->where('finance_check', '=', 1);
-            } else {
-                $order = $order->where('trail_check', '=', 1);
-            }
-
+        if ($this->request->input('finance_check')) {
+            $order = $order->where('finance_check', '=', $this->request->input('finance_check'));
+        }
+        if ($this->request->input('trail_check')) {
+            $order = $order->where('trail_check', '=', $this->request->input('trail_check'));
         }
         if ($this->request->input('is_audit')) {
             $order = $order->where('is_audit', '=', $this->request->input('is_audit'));

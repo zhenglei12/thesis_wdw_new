@@ -82,11 +82,16 @@ Route::group(['namespace' => 'Admin', 'middleware' => ['cross', 'auth:sanctum', 
     Route::post("order/export", "OrderControllers@export")->name('order-export');
 
     Route::post("edit/order/list", "EditControllers@orderList")->name('edit-statistics.order.list');
-    Route::post("edit/statistics/all/list", "EditControllers@allList")->name('edit-statistics.all.list');
-    Route::post("edit/statistics/day/list", "EditControllers@dayList")->name('edit-statistics.day.list');
 
-    Route::post("staff/statistics/list", "StaffControllers@list")->name('staff-statistics.list');
-    Route::post("staff/statistics/list/export", "StaffControllers@export")->name('staff-statistics.export');
+
+
+
+    Route::post("edit/statistics/all/list", "EditControllers@allList")->name('edit-statistics.all.list');//总额统计
+    Route::post("edit/statistics/day/list", "EditControllers@dayList")->name('edit-statistics.day.list'); //编辑统计列表
+    Route::post("edit/statistics/day/export", "EditControllers@dayListExport")->name('edit-statistics.day.export'); //编辑统计导出
+
+    Route::post("staff/statistics/list", "StaffControllers@list")->name('edit-statistics.list'); //销售统计列表
+    Route::post("staff/statistics/list/export", "StaffControllers@export")->name('edit-statistics.export');//销售统计列表导出
 
     Route::post("manuscript_bank/list", "ManuscriptBankControllers@list")->name('manuscript_bank-list');
     Route::post("manuscript_bank/delete", "ManuscriptBankControllers@delete")->name('manuscript_bank-delete');

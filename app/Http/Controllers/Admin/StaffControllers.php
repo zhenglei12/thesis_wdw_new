@@ -80,7 +80,7 @@ class StaffControllers
         $all = $all->whereIn('staff_name', $userName);
         $data['amount_count'] = $all->sum('amount');
         $data['received_amount_count'] = $all->sum('received_amount');
-        $data['receipt_amount_count'] = $all->sum('receipt_time');
+        $data['receipt_amount_count'] = number_format($all->sum('amount') - $all->sum('received_amount'), 2, '.', '');
         $data['after_amount_count'] = $all->sum('after_banlace');
         $data['list'] = $order->select(
             "staff_name",
@@ -93,7 +93,7 @@ class StaffControllers
             throw \ExceptionFactory::business(CodeMessageConstants::CHECK_ORDER_NULL);
         if (count($data) > 2000)
             throw \ExceptionFactory::business(CodeMessageConstants::CHECK_ORDER_NUM);
-        $filename = '员工统计列表.xls';
+        $filename = '销售统计列表.xls';
         return Excel::download(new ExportsStaffService($data['list']), $filename);
     }
 }

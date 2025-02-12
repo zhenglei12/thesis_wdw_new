@@ -12,7 +12,7 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ExportsStaffService implements FromCollection, WithHeadings, WithStyles
+class ExportsEditServices implements FromCollection, WithHeadings, WithStyles
 {
     use Exportable;
 
@@ -25,7 +25,7 @@ class ExportsStaffService implements FromCollection, WithHeadings, WithStyles
 
     public function headings(): array
     {
-        return ["序号", "客服名称", "总金额", "已回收金额", "尾款金额", "退款金额","字数", "具体篇数"];
+        return ["客服名称", "总金额", "已回收金额", "总尾款金额", "总售后金额"];
     }
 
 
@@ -60,6 +60,7 @@ class ExportsStaffService implements FromCollection, WithHeadings, WithStyles
     private function setData($result)
     {
         $this->data = [];
+        Log::debug("111", ['aa' => $result]);
         foreach ($result as $key => $v) {
             array_push($this->data, [
                 $v['staff_name'],
