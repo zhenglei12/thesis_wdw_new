@@ -144,6 +144,9 @@ class OrderControllers extends Controller
         if ($this->request->input('major_name')) {
             $order = $order->where('major_name', 'like', "%" . $this->request->input('major_name') . "%");
         }
+        if ($this->request->input('manuscript_content')) {
+            $order = $order->where('manuscript_content', 'like', "%" . $this->request->input('manuscript_content') . "%");
+        }
         if ($this->request->input('manuscript_plan')) {
             $order = $order->where('manuscript_plan', '=', $this->request->input('manuscript_plan'));
         }
@@ -569,6 +572,9 @@ class OrderControllers extends Controller
         }
         if ($this->request->input('status')) {
             $order = $order->where('status', '=', $this->request->input('status'));
+        }
+        if ($this->request->input('manuscript_content')) {
+            $order = $order->where('manuscript_content', 'like', "%" . $this->request->input('manuscript_content') . "%");
         }
         if ($this->request->input('major_name')) {
             $order = $order->where('major_name', 'like', "%" . $this->request->input('major_name') . "%");
