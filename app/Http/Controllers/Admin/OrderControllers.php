@@ -432,7 +432,8 @@ class OrderControllers extends Controller
         $alter_word = $this->request->input('alter_word') ?? $order['alter_word'];
         $remark = $this->planReplace(\Auth::user()->name, $order['manuscript_plan'], $this->request['manuscript_plan']);
         $orderLogs['remark'] = $this->statusReplace(\Auth::user()->name, $order['status'], 5) . $remark;
-        $orderLogs['url'] = $this->request->input('manuscript') ?? null;
+        $manuscript = $this->request->input('manuscript') ? $this->request->input('manuscript') : null;
+        $orderLogs['url'] = $manuscript;
         $orderLogs['order_id'] = $this->request->input('id');
         $data = $this->request->input();
 //        if (isset($data['classify_id'])) {
@@ -442,9 +443,9 @@ class OrderControllers extends Controller
 //            $classify_local_id = null;
 //            $classify_id = null;
 //        }
-        return DB::transaction(function () use ($orderLogs, $alter_word) {
+        return DB::transaction(function () use ($orderLogs, $alter_word,$manuscript) {
             OrderLogs::create($orderLogs);
-            return Order::where('id', $this->request->input('id'))->update(['manuscript' => $this->request->input('manuscript') ?? null, "manuscript_plan" => $this->request->input('manuscript_plan'), "edit_remark" => $this->request->input('edit_remark') ?? "", "status" => 5, "proposal" => 5, 'alter_word' => $alter_word, 'manuscript_content' => $this->request->input('manuscript_content'), 'edit_submit_time' => date("Y-m-d H:i:s")]);
+            return Order::where('id', $this->request->input('id'))->update(['manuscript' => $manuscript, "manuscript_plan" => $this->request->input('manuscript_plan'), "edit_remark" => $this->request->input('edit_remark') ?? "", "status" => 5, "proposal" => 5, 'alter_word' => $alter_word, 'manuscript_content' => $this->request->input('manuscript_content'), 'edit_submit_time' => date("Y-m-d H:i:s")]);
         });
     }
 
