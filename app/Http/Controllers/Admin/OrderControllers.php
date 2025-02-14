@@ -206,6 +206,13 @@ class OrderControllers extends Controller
         $this->request->validate([
             'id' => ['required', 'exists:' . (new Order())->getTable() . ',id'],
         ]);
+
+        $user = \Auth::user();
+        //查询用户当前角色
+        $role = $user->roles->pluck('alias')->toArray();
+        if (in_array('edit', $role)) {
+            throw \ExceptionFactory::business(['code' => 129, 'message' => "编辑不能删除订单"]);
+        }
         return Order::where('id', $this->request->input('id'))->delete();
     }
 
