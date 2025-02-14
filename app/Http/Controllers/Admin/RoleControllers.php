@@ -124,10 +124,12 @@ class RoleControllers extends Controller
             'permissions' => 'array'
         ]);
         $id = $this->request->input('id');
-        //  $this->checkRole($id);
-        $role = Role::query()->findOrFail($id);
-        $role->syncPermissions($this->request->input('permissions', []));
-        return;
+        return \DB::transaction(function () use ($id) {
+            //  $this->checkRole($id);
+            $role = Role::query()->findOrFail($id);
+            $role->syncPermissions($this->request->input('permissions', []));
+            return;
+        });
     }
 
     /**
