@@ -388,6 +388,9 @@ class OrderControllers extends Controller
             '6' => "文章修改",
             '7' => "其他制作",
         ];
+        if (is_null($historyStarus)) {
+            return ",并将稿件进度修改为" . $data[$status];
+        }
         return ",并将稿件进度" . $data[$historyStarus] . "修改为" . $data[$status];
     }
 
@@ -422,7 +425,7 @@ class OrderControllers extends Controller
     {
         $this->request->validate([
             'id' => ['required', 'exists:' . (new Order())->getTable() . ',id'],
-      //      'manuscript' => ['required'],
+            //      'manuscript' => ['required'],
             "alter_word" => ['required'],
             "manuscript_plan" => ['required'],
             // "classify_id" => ['required']
@@ -443,7 +446,7 @@ class OrderControllers extends Controller
 //            $classify_local_id = null;
 //            $classify_id = null;
 //        }
-        return DB::transaction(function () use ($orderLogs, $alter_word,$manuscript) {
+        return DB::transaction(function () use ($orderLogs, $alter_word, $manuscript) {
             OrderLogs::create($orderLogs);
             return Order::where('id', $this->request->input('id'))->update(['manuscript' => $manuscript, "manuscript_plan" => $this->request->input('manuscript_plan'), "edit_remark" => $this->request->input('edit_remark') ?? "", "status" => 5, "proposal" => 5, 'alter_word' => $alter_word, 'manuscript_content' => $this->request->input('manuscript_content'), 'edit_submit_time' => date("Y-m-d H:i:s")]);
         });
